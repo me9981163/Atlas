@@ -1,0 +1,30 @@
+[package]
+name = "atlas-cli"
+version = "0.1.0"
+edition = "2021"
+description = "Atlas code indexing toolkit"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/me9981163/Atlas"
+readme = "../../README.md"
+keywords = ["code", "index", "graph", "symbols"]
+categories = ["development-tools"]
+publish = false
+
+[[bin]]
+name = "atlas"
+path = "src/main.rs"
+
+[dependencies]
+atlas-core = { path = "../atlas-core" }
+atlas-embed = { path = "../atlas-embed" }
+atlas-parser = { path = "../atlas-parser" }
+clap = { version = "4.5", features = ["derive"] }
+atlas-index = { path = "../atlas-index" }
+atlas-scan = { path = "../atlas-scan" }
+serde_json = { workspace = true }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+tempfile = "3.10"

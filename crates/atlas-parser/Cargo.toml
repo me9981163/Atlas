@@ -1,0 +1,21 @@
+[package]
+name = "atlas-parser"
+version = "0.1.0"
+edition = "2021"
+description = "Atlas code indexing toolkit"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/me9981163/Atlas"
+readme = "../../README.md"
+keywords = ["code", "index", "graph", "symbols"]
+categories = ["development-tools"]
+publish = false
+
+[dependencies]
+atlas-core = { path = "../atlas-core" }
+tree-sitter = { workspace = true }
+tree-sitter-rust = { workspace = true }
+tree-sitter-python = "0.23"
+tree-sitter-typescript = "0.23"
+thiserror = { workspace = true }
+
+[dev-dependencies]

@@ -1,0 +1,31 @@
+[package]
+name = "atlas-tauri"
+version = "0.1.0"
+edition = "2021"
+description = "Atlas desktop app"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/me9981163/Atlas"
+readme = "../../README.md"
+keywords = ["code", "index", "graph", "symbols"]
+categories = ["development-tools"]
+publish = false
+
+[lib]
+name = "atlas_tauri"
+path = "src/lib.rs"
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+atlas-embed = { path = "../atlas-embed" }
+atlas-index = { path = "../atlas-index" }
+atlas-scan = { path = "../atlas-scan" }
+serde = { workspace = true }
+tauri = { version = "2.12", features = [] }
+tauri-plugin-dialog = "2.8"
+thiserror = { workspace = true }
+
+[dev-dependencies]
+rusqlite = { workspace = true }
+tempfile = "3.10"

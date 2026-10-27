@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Core IPC and native folder picker for the Atlas main window.","local":true,"windows":["main"],"permissions":["core:default","dialog:default"]}}

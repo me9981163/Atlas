@@ -1,0 +1,24 @@
+[package]
+name = "atlas-scan"
+version = "0.1.0"
+edition = "2021"
+description = "Atlas code indexing toolkit"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/me9981163/Atlas"
+readme = "../../README.md"
+keywords = ["code", "index", "graph", "symbols"]
+categories = ["development-tools"]
+publish = false
+
+[dependencies]
+atlas-core = { path = "../atlas-core" }
+atlas-parser = { path = "../atlas-parser" }
+atlas-index = { path = "../atlas-index" }
+ignore = "0.4"
+rayon = "1.10"
+blake3 = "1.5"
+thiserror = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.10"

@@ -1,0 +1,16 @@
+[package]
+name = "atlas-core"
+version = "0.1.0"
+edition = "2021"
+description = "Atlas code indexing toolkit"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/me9981163/Atlas"
+readme = "../../README.md"
+keywords = ["code", "index", "graph", "symbols"]
+categories = ["development-tools"]
+publish = false
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

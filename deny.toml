@@ -1,0 +1,58 @@
+# cargo-deny configuration for Atlas (schema of cargo-deny 0.20).
+# Run `cargo deny check` locally; CI enforces the same via cargo-deny-action@v2.
+
+[advisories]
+# Any matched RUSTSEC advisory fails the check. Add an entry here ONLY with a
+# reason, and remove it once the dependency is updated.
+ignore = [
+    # number_prefix: unmaintained, pulled by indicatif via tokenizers
+    # (model2vec-rs). No vulnerability, no upgrade path; revisit when
+    # tokenizers drops it.
+    { id = "RUSTSEC-2025-0119", reason = "unmaintained-only, transitive via tokenizers/indicatif, no vulnerability" },
+    # paste: unmaintained, pulled by tokenizers (model2vec-rs). Same situation.
+    { id = "RUSTSEC-2024-0436", reason = "unmaintained-only, transitive via tokenizers, no vulnerability" },
+    # proc-macro-error: unmaintained, pulled by glib-macros via tauri's gtk
+    # bindings. Same situation.
+    { id = "RUSTSEC-2024-0370", reason = "unmaintained-only, transitive via glib/tauri, no vulnerability" },
+]
+
+[licenses]
+# Permissive licenses only, compatible with Atlas's "MIT OR Apache-2.0".
+# "Apache-2.0 WITH LLVM-exception" covers blake3's inline-assembly files.
+# "Unicode-3.0" covers unicode-ident (successor of Unicode-DFS-2016).
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "CC0-1.0",
+    # The following come through tauri's transitive trees; each reviewed for
+    # this project: MPL-2.0 (cssparser/selectors/dtoa-short/option-ext) is
+    # file-level copyleft, compatible with linking under MIT/Apache;
+    # CDLA-Permissive-2.0 (webpki-roots) is Mozilla's permissive data license
+    # for the bundled root certificates; Zlib (foldhash) is permissive.
+    "MPL-2.0",
+    "CDLA-Permissive-2.0",
+    "Zlib",
+]
+confidence-threshold = 0.8
+# Note: model2vec-rs (our pinned semantic-search engine) declares no SPDX
+# expression, only a LICENSE file; cargo-deny detects it as MIT from the text
+# (hence the harmless no-license-field warning).
+
+
+[bans]
+# Duplicate crates are surfaced but do not fail the gate: several transitive
+# trees (tauri, candle) legitimately pin different majors of small crates.
+multiple-versions = "warn"
+wildcards = "allow"
+
+[sources]
+# crates.io is the only allowed registry; git dependencies are denied outright.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

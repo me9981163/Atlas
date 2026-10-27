@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Atlas — Local code intelligence</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" focusable="false">
+              <path d="M8 24 16 8l8 16" />
+              <path d="M11.5 18h9" />
+              <circle cx="8" cy="24" r="2.4" />
+              <circle cx="16" cy="8" r="2.4" />
+              <circle cx="24" cy="24" r="2.4" />
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <h1 data-i18n="appName">Atlas</h1>
+            <p data-i18n="tagline">Local-first code intelligence</p>
+          </div>
+        </div>
+
+        <form id="open-form" class="repo-form">
+          <label class="sr-only" for="repo-path" data-i18n="repositoryPath"
+            >Repository path</label
+          >
+          <div class="path-field">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"
+              />
+            </svg>
+            <input
+              id="repo-path"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              dir="ltr"
+              data-i18n-placeholder="repoPlaceholder"
+              placeholder="/path/to/repository"
+            />
+          </div>
+          <button id="browse-btn" class="btn ghost" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 7h6l2 2h8v10H4z" />
+              <path d="M4 7V5h6l2 2" />
+            </svg>
+            <span data-i18n="browse">Browse…</span>
+          </button>
+          <button id="open-btn" class="btn" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 4h9l5 5v11H5z" />
+              <path d="M14 4v5h5" />
+            </svg>
+            <span data-i18n="open">Open</span>
+          </button>
+          <button id="index-btn" class="btn accent" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 5h16M4 12h16M4 19h10" />
+            </svg>
+            <span data-i18n="index">Index</span>
+          </button>
+        </form>
+
+        <button id="lang-btn" class="btn ghost lang-btn" type="button">
+          العربية
+        </button>
+      </header>
+
+      <div id="repo-summary" class="repo-summary hidden">
+        <div class="repo-summary-main">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="repo-root" class="repo-root" dir="ltr"></span>
+          <span class="repo-sep" aria-hidden="true">·</span>
+          <span class="repo-db"
+            ><span data-i18n="dbLabel">Index database</span>:
+            <code id="repo-db" dir="ltr"></code
+          ></span>
+        </div>
+        <div class="repo-summary-actions">
+          <span id="app-status" class="app-status">Ready</span>
+          <button id="close-btn" class="btn tiny ghost" type="button">
+            <span data-i18n="closeRepository">Close repository</span>
+          </button>
+        </div>
+      </div>
+
+      <main class="workspace">
+        <aside class="panel left-panel">
+          <section class="panel-section stats-section">
+            <div class="section-heading">
+              <h2 data-i18n="statsTitle">Index overview</h2>
+              <span id="index-state" class="pill muted-pill">—</span>
+            </div>
+
+            <div id="not-indexed" class="notice hidden">
+              <strong data-i18n="notIndexed">Not indexed yet</strong>
+              <span data-i18n="notIndexedHint"
+                >This repository has no indexed files. Run Index to build the
+                graph.</span
+              >
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span class="stat-value" id="stat-files">—</span>
+                <span class="stat-label" data-i18n="files">Files</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value" id="stat-symbols">—</span>
+                <span class="stat-label" data-i18n="symbols">Symbols</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value" id="stat-edges">—</span>
+                <span class="stat-label" data-i18n="edges">Call edges</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value" id="stat-resolved">—</span>
+                <span class="stat-label" data-i18n="resolved">Resolved</span>
+              </div>
+            </div>
+
+            <div class="accuracy">
+              <div class="accuracy-head">
+                <span data-i18n="accuracy">Resolution</span>
+                <span id="accuracy-text" class="muted">—</span>
+              </div>
+              <div
+                class="accuracy-bar"
+                role="img"
+                aria-label="Call edge resolution"
+              >
+                <span id="bar-resolved" class="bar-resolved"></span>
+                <span id="bar-external" class="bar-external"></span>
+                <span id="bar-unresolved" class="bar-unresolved"></span>
+              </div>
+              <div class="accuracy-legend">
+                <span
+                  ><i class="swatch resolved"></i
+                  ><span data-i18n="resolved">Resolved</span>
+                  <b id="legend-resolved">—</b></span
+                >
+                <span
+                  ><i class="swatch external"></i
+                  ><span data-i18n="external">External</span>
+                  <b id="legend-external">—</b></span
+                >
+                <span
+                  ><i class="swatch unresolved"></i
+                  ><span data-i18n="unresolved">Unresolved</span>
+                  <b id="legend-unresolved">—</b></span
+                >
+              </div>
+            </div>
+
+            <details id="warnings-box" class="warnings hidden">
+              <summary id="warnings-summary"></summary>
+              <ul id="warnings-list"></ul>
+            </details>
+          </section>
+
+          <section class="panel-section search-section">
+            <div class="section-heading">
+              <h2 data-i18n="searchTitle">Search</h2>
+              <span id="search-count" class="pill muted-pill"></span>
+            </div>
+            <div
+              class="search-modes"
+              role="group"
+              data-i18n-aria-label="searchMode"
+              aria-label="Search mode"
+            >
+              <button id="mode-lexical" class="mode-btn active" type="button">
+                <span data-i18n="searchModeLexical">Lexical</span>
+              </button>
+              <button id="mode-semantic" class="mode-btn" type="button">
+                <span data-i18n="searchModeSemantic">Semantic</span>
+                <span class="beta-pill" data-i18n="beta">beta</span>
+              </button>
+            </div>
+            <form id="search-form" class="search-form">
+              <div class="search-field">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="m15.5 15.5 4 4" />
+                </svg>
+                <input
+                  id="search-input"
+                  type="search"
+                  dir="auto"
+                  spellcheck="false"
+                  autocomplete="off"
+                  data-i18n-placeholder="searchPlaceholder"
+                  placeholder="Search names, signatures, docs…"
+                />
+                <button
+                  id="search-btn"
+                  class="icon-btn"
+                  type="submit"
+                  aria-label="Search"
+                  data-i18n-aria-label="search"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M5 12h13M13 7l5 5-5 5" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+            <div id="semantic-panel" class="semantic-panel hidden">
+              <div class="semantic-head">
+                <div class="semantic-copy">
+                  <span id="semantic-model" class="semantic-model" dir="ltr"></span>
+                  <span id="semantic-detail" class="semantic-detail"></span>
+                </div>
+                <span id="semantic-pill" class="pill muted-pill">—</span>
+              </div>
+              <div id="semantic-progress" class="semantic-progress hidden">
+                <div class="semantic-progress-bar">
+                  <span id="semantic-progress-fill"></span>
+                </div>
+                <span id="semantic-progress-text" class="semantic-progress-text"></span>
+              </div>
+              <div class="semantic-actions">
+                <button
+                  id="download-model-btn"
+                  class="btn tiny"
+                  type="button"
+                  disabled
+                >
+                  <span data-i18n="downloadModel">Download model</span>
+                </button>
+                <button
+                  id="embed-btn"
+                  class="btn tiny accent"
+                  type="button"
+                  disabled
+                >
+                  <span data-i18n="buildSemanticIndex">Build semantic index</span>
+                </button>
+              </div>
+            </div>
+            <p id="search-hint" class="hint" data-i18n="searchHint">
+              Search is lexical (FTS5): names, signatures and docs.
+            </p>
+            <div id="search-state" class="search-state hidden"></div>
+            <ul id="search-results" class="result-list"></ul>
+          </section>
+        </aside>
+
+        <section class="panel graph-panel">
+          <div class="graph-header">
+            <div class="graph-title">
+              <h2 data-i18n="graphTitle">Call graph</h2>
+              <span id="graph-meta" class="muted"></span>
+            </div>
+            <div class="graph-controls">
+              <label class="control">
+                <span data-i18n="depth">Depth</span>
+                <select id="graph-depth">
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+              <label class="control">
+                <span data-i18n="maxNodes">Max nodes</span>
+                <select id="graph-limit">
+                  <option value="40">40</option>
+                  <option value="80" selected>80</option>
+                  <option value="120">120</option>
+                </select>
+              </label>
+              <button id="graph-back" class="btn tiny ghost" type="button" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M19 12H6M11 7l-5 5 5 5" />
+                </svg>
+                <span data-i18n="back">Back</span>
+              </button>
+              <button id="graph-fit" class="btn tiny ghost" type="button" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+                </svg>
+                <span data-i18n="fit">Fit</span>
+              </button>
+              <div class="zoom-group" role="group" aria-label="Zoom">
+                <button
+                  id="zoom-out"
+                  class="icon-btn"
+                  type="button"
+                  data-i18n-aria-label="zoomOut"
+                  aria-label="Zoom out"
+                  disabled
+                >
+                  −
+                </button>
+                <button
+                  id="zoom-in"
+                  class="icon-btn"
+                  type="button"
+                  data-i18n-aria-label="zoomIn"
+                  aria-label="Zoom in"
+                  disabled
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="graph-canvas">
+            <svg
+              id="graph"
+              class="graph"
+              role="img"
+              aria-label="Call graph"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <marker
+                  id="arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="7"
+                  markerHeight="7"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M0 0 10 5 0 10z" class="arrow-head" />
+                </marker>
+                <filter id="node-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow
+                    dx="0"
+                    dy="4"
+                    stdDeviation="5"
+                    flood-color="#000"
+                    flood-opacity="0.35"
+                  />
+                </filter>
+              </defs>
+              <g id="graph-viewport">
+                <g id="graph-edges"></g>
+                <g id="graph-nodes"></g>
+              </g>
+            </svg>
+
+            <div id="graph-empty" class="empty-overlay">
+              <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 64 64" focusable="false">
+                  <circle cx="16" cy="32" r="6" />
+                  <circle cx="48" cy="18" r="6" />
+                  <circle cx="48" cy="46" r="6" />
+                  <path d="M22 29 42 20M22 35l20 9" />
+                </svg>
+              </div>
+              <h3 data-i18n="graphEmpty">
+                Select a symbol to explore its callers and callees.
+              </h3>
+              <p data-i18n="graphNote">
+                Resolved call edges only. Unresolved calls appear in the Callees
+                tab.
+              </p>
+            </div>
+
+            <div id="graph-loading" class="empty-overlay hidden">
+              <div class="spinner" aria-hidden="true"></div>
+              <p data-i18n="graphLoading">Loading graph…</p>
+            </div>
+
+            <div id="graph-truncated" class="graph-banner hidden">
+              <span data-i18n="graphTruncated"
+                >Node limit reached — this is a partial graph.</span
+              >
+            </div>
+
+            <div class="graph-legend">
+              <span class="legend-title" data-i18n="legend">Legend</span>
+              <span><i class="swatch root"></i><span data-i18n="legendRoot">selected symbol</span></span>
+              <span><i class="swatch caller"></i><span data-i18n="legendCaller">caller</span></span>
+              <span><i class="swatch callee"></i><span data-i18n="legendCallee">callee</span></span>
+              <span><i class="edge-swatch import"></i><span data-i18n="legendImport">import edge</span></span>
+              <span><i class="edge-swatch same_file"></i><span data-i18n="legendSameFile">same-file edge</span></span>
+              <span><i class="edge-swatch unique_name"></i><span data-i18n="legendUnique">unique-name edge</span></span>
+            </div>
+          </div>
+
+          <div class="graph-footer">
+            <p class="hint" data-i18n="graphNote">
+              Resolved call edges only. Unresolved calls appear in the Callees
+              tab.
+            </p>
+          </div>
+        </section>
+
+        <aside class="panel right-panel">
+          <div id="detail-empty" class="empty-state">
+            <div class="empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64" focusable="false">
+                <path d="M18 12h20l8 8v32H18z" />
+                <path d="M38 12v9h8M25 30h14M25 38h14M25 46h9" />
+              </svg>
+            </div>
+            <h3 data-i18n="detailsEmpty">
+              Select a search result or graph node to see details.
+            </h3>
+          </div>
+
+          <div id="detail" class="detail hidden">
+            <div class="detail-head">
+              <div id="detail-kind" class="detail-kind"></div>
+              <h2 id="detail-name" dir="ltr"></h2>
+              <div id="detail-qname" class="qname" dir="ltr"></div>
+              <div id="detail-location" class="location" dir="ltr"></div>
+            </div>
+
+            <section id="detail-signature-box" class="detail-block hidden">
+              <h3 data-i18n="signature">Signature</h3>
+              <pre id="detail-signature" dir="ltr"></pre>
+            </section>
+
+            <section id="detail-doc-box" class="detail-block hidden">
+              <h3 data-i18n="documentation">Documentation</h3>
+              <div id="detail-doc" class="doc"></div>
+            </section>
+
+            <div class="tabs" role="tablist">
+              <button
+                class="tab active"
+                type="button"
+                data-tab="callers"
+                role="tab"
+                aria-selected="true"
+              >
+                <span data-i18n="callers">Callers</span>
+                <span id="tab-count-callers" class="tab-count">0</span>
+              </button>
+              <button
+                class="tab"
+                type="button"
+                data-tab="callees"
+                role="tab"
+                aria-selected="false"
+              >
+                <span data-i18n="callees">Callees</span>
+                <span id="tab-count-callees" class="tab-count">0</span>
+              </button>
+              <button
+                class="tab"
+                type="button"
+                data-tab="impact"
+                role="tab"
+                aria-selected="false"
+              >
+                <span data-i18n="impact">Impact</span>
+                <span id="tab-count-impact" class="tab-count">0</span>
+              </button>
+            </div>
+
+            <div id="impact-controls" class="impact-controls hidden">
+              <label class="control">
+                <span data-i18n="impactDepth">Impact depth</span>
+                <select id="impact-depth">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5" selected>5</option>
+                  <option value="6">6</option>
+                  <option value="8">8</option>
+                  <option value="10">10</option>
+                </select>
+              </label>
+              <p class="hint" data-i18n="impactNote">
+                Follows resolved call edges only. Unresolved calls may hide
+                impact.
+              </p>
+            </div>
+
+            <div id="tab-content" class="tab-content"></div>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <span data-i18n="tagline">Local-first code intelligence</span>
+        <span class="footer-dot" aria-hidden="true">·</span>
+        <span>v1.0.0</span>
+      </footer>
+    </div>
+
+    <div id="confirm-modal" class="modal hidden">
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-message"
+        tabindex="-1"
+      >
+        <h3 id="confirm-title" class="modal-title"></h3>
+        <p id="confirm-message" class="modal-message"></p>
+        <div class="modal-actions">
+          <button id="confirm-cancel" class="btn" type="button">
+            <span data-i18n="cancel">Cancel</span>
+          </button>
+          <button id="confirm-ok" class="btn accent" type="button">
+            <span data-i18n="continueAction">Continue</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="toast-container"
+      class="toast-container"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+
+    <script src="i18n.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

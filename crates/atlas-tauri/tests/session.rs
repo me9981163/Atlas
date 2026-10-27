@@ -1,5 +1,6 @@
 use atlas_tauri::AtlasState;
 use std::fs;
+use std::path::Path;
 use tempfile::TempDir;
 
 fn write_repository() -> TempDir {
@@ -20,7 +21,8 @@ fn open_index_search_and_query_a_repository() {
     let opened = state.open(repo.path().to_str().unwrap()).unwrap();
     assert!(!opened.indexed);
     assert_eq!(opened.stats.symbol_count, 0);
-    assert!(opened.db_path.ends_with(".atlas/atlas.db"));
+    // Path::ends_with compares components, so it is separator-agnostic on Windows.
+    assert!(Path::new(&opened.db_path).ends_with(".atlas/atlas.db"));
     assert!(repo.path().join(".atlas/atlas.db").is_file());
 
     let outcome = state.index().unwrap();
